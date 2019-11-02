@@ -82,7 +82,7 @@ public class DigitalDisplay extends JPanel {
 
         int x = START_X;
         int currentDigit = 0;
-        int n = 0xFF & value;
+        int n = 0xFFFF & value;
         do {
             int digit = n % 10;
             g.drawImage(displayImages[digit], x, START_Y, DIGIT_WIDTH, DIGIT_HEIGHT, null);

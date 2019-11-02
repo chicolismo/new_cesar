@@ -2,14 +2,13 @@ package cesar.gui.displays;
 
 import java.awt.Dimension;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 
 import cesar.hardware.Base;
+import cesar.utils.Defaults;
 
 public class RegisterDisplay extends JPanel {
     private static final long serialVersionUID = 7050289063551512021L;
@@ -34,8 +33,8 @@ public class RegisterDisplay extends JPanel {
         add(Box.createRigidArea(new Dimension(0, 2)));
         add(binaryDisplay);
         add(Box.createVerticalGlue());
-        setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), label, TitledBorder.LEFT,
-            TitledBorder.CENTER));
+
+        setBorder(Defaults.createTitledBorder(label));
 
         doLayout();
         setMinimumSize(getPreferredSize());
@@ -47,5 +46,14 @@ public class RegisterDisplay extends JPanel {
             digitalDisplay.setBase(newBase);
             digitalDisplay.repaint();
         }
+    }
+
+    public void setValue(short value) {
+        digitalDisplay.setValue(value);
+        binaryDisplay.setValue(value);
+    }
+
+    public int getNumber() {
+        return registerNumber;
     }
 }

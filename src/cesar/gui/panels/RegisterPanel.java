@@ -32,4 +32,12 @@ public class RegisterPanel extends JPanel {
         add(registerDisplays[7]);
         doLayout();
     }
+
+    public RegisterDisplay[] getDisplays() {
+        return registerDisplays;
+    }
+
+    public RegisterDisplay getDisplay(int i) {
+        return registerDisplays[i];
+    }
 }

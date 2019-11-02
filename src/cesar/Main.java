@@ -19,20 +19,15 @@ public class Main {
 
         try {
             // Set cross-platform Java L&F (also called "Metal")
-            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+            // UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
-        catch (UnsupportedLookAndFeelException e) {
-            // handle exception
+        catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
+            | IllegalAccessException e) {
+            System.err.println(e.getMessage());
         }
-        catch (ClassNotFoundException e) {
-            // handle exception
-        }
-        catch (InstantiationException e) {
-            // handle exception
-        }
-        catch (IllegalAccessException e) {
-            // handle exception
-        }
+
 
         SwingUtilities.invokeLater(() -> {
             MainWindow window = new MainWindow();

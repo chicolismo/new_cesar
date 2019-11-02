@@ -29,6 +29,14 @@ public class Cpu {
         isHalted = true;
     }
 
+    public short getRegisterValue(int registerNumber) {
+        return registers[registerNumber];
+    }
+
+    public void setRegisterValue(int registerNumber, short newValue) {
+        registers[registerNumber] = newValue;
+    }
+
     public byte[] getMemory() {
         return memory;
     }
@@ -41,7 +49,7 @@ public class Cpu {
         }
     }
 
-    boolean isDisplayAddress(final short address) {
+    public boolean isDisplayAddress(final short address) {
         int unsigned = Shorts.toUnsignedInt(address);
         return (unsigned >= BEGIN_DISPLAY_ADDRESS && unsigned <= END_DISPLAY_ADDRESS);
     }

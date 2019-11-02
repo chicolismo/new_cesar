@@ -3,12 +3,11 @@ package cesar.gui.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 
 import cesar.gui.displays.DigitalDisplay;
+import cesar.utils.Defaults;
 
 public class ExecutionPanel extends JPanel {
     private static final long serialVersionUID = 8981667379501321204L;
@@ -25,13 +24,13 @@ public class ExecutionPanel extends JPanel {
     }
 
     private void initLayout() {
-        JLabel accessLabel = new JLabel("Acessos:");
-        JLabel instructionLabel = new JLabel("Instruções:");
+        JLabel accessLabel = Defaults.createLabel("Acessos: ");
+        JLabel instructionLabel = Defaults.createLabel("Instruções: ");
 
         GridBagLayout grid = new GridBagLayout();
         grid.columnWidths = new int[] { 0, 0 };
         grid.rowHeights = new int[] { 0, 0 };
-        grid.columnWeights = new double[] { 1.0, 0.0 };
+        grid.columnWeights = new double[] { 0.0, 0.0 };
         grid.rowWeights = new double[] { 0.0, 0.0 };
 
         setLayout(grid);
@@ -60,8 +59,7 @@ public class ExecutionPanel extends JPanel {
         c_3.anchor = GridBagConstraints.EAST;
         add(instructionDisplay, c_3);
 
-        setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Execução", TitledBorder.LEFT,
-            TitledBorder.CENTER));
+        setBorder(Defaults.createTitledBorder("Execução:"));
     }
 
 

@@ -39,7 +39,7 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
 
         this.currentBase = Base.Decimal;
         this.label = new JLabel("0");
-        this.input = new JTextField(10);
+        this.input = new JTextField(5);
         this.table = table;
 
         initLayout();

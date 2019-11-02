@@ -1,9 +1,10 @@
 package cesar.gui.panels;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-public class ConditionPanel extends JLabel {
+public class ConditionPanel extends JPanel {
     private static final long serialVersionUID = -595687570078206074L;
 
     final LedPanel negative;
@@ -20,8 +21,20 @@ public class ConditionPanel extends JLabel {
         BoxLayout vbox = new BoxLayout(this, BoxLayout.X_AXIS);
         setLayout(vbox);
         add(negative);
+        add(Box.createHorizontalGlue());
         add(zero);
+        add(Box.createHorizontalGlue());
         add(overflow);
+        add(Box.createHorizontalGlue());
         add(carry);
+
+//        setLayout(vbox);
+//        add(negative);
+//        add(Box.createHorizontalGlue());
+//        add(zero);
+//        add(Box.createHorizontalGlue());
+//        add(overflow);
+//        add(Box.createHorizontalGlue());
+//        add(carry);
     }
 }

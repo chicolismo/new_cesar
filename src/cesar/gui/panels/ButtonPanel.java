@@ -1,5 +1,7 @@
 package cesar.gui.panels;
 
+import java.awt.Font;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -41,26 +43,35 @@ public class ButtonPanel extends JPanel {
     private final JButton btnNext;
 
     public ButtonPanel() {
-        btnDec = new JToggleButton("0..10");
-        btnHex = new JToggleButton("0..F");
+        btnDec = new JToggleButton("Dec");
+        btnHex = new JToggleButton("Hex");
         btnRun = new JToggleButton(new ImageIcon(runIcon));
         btnNext = new JButton(new ImageIcon(nextIcon));
-
         initLayout();
     }
 
     private void initLayout() {
         BoxLayout box = new BoxLayout(this, BoxLayout.X_AXIS);
         setLayout(box);
-        btnDec.setAlignmentY(JComponent.CENTER_ALIGNMENT);
-        btnHex.setAlignmentY(JComponent.CENTER_ALIGNMENT);
-        btnRun.setAlignmentY(JComponent.CENTER_ALIGNMENT);
-        btnNext.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+        btnDec.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
+        btnHex.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
+        btnRun.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
+        btnNext.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
+
+        Font font = new Font(Font.MONOSPACED, Font.PLAIN, 10);
+        Insets margins = new Insets(0, 0, 0, 0);
 
         btnDec.putClientProperty("JButton.buttonType", "segmentedTextured");
         btnDec.putClientProperty("JButton.segmentPosition", "first");
+        btnDec.setFont(font);
         btnHex.putClientProperty("JButton.buttonType", "segmentedTextured");
         btnHex.putClientProperty("JButton.segmentPosition", "last");
+        btnHex.setFont(font);
+
+        btnDec.setMargin(margins);
+        btnHex.setMargin(margins);
+        btnRun.setMargin(margins);
+        btnNext.setMargin(margins);
 
         ButtonGroup g = new ButtonGroup();
         g.add(btnDec);
