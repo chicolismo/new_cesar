@@ -8,6 +8,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
+import cesar.utils.Shorts;
+
 public class BinaryDisplay extends JPanel {
     private static final long serialVersionUID = -5490249529061282417L;
 
@@ -57,7 +59,7 @@ public class BinaryDisplay extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        int n = 0xFF & value;
+        int n = Shorts.toUnsignedInt(value);
         int x = START_X;
         int currentDigit = 0;
 

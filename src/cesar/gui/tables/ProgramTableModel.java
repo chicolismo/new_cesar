@@ -5,23 +5,32 @@ import cesar.hardware.Base;
 public class ProgramTableModel extends GenericTableModel {
     private static final long serialVersionUID = -4478787339759105256L;
     private static final String[] columnNames = new String[] { "PC", "Endereço", "Valor", "Mnemônico" };
+    private static final Class<?>[] columnClasses = new Class<?>[] { String.class, Integer.class, Byte.class,
+        String.class };
 
     private int currentPcRow;
-    private Base currentBase;
     private byte[] data;
 
     public ProgramTableModel(byte[] data) {
         this.currentPcRow = 0;
-        this.currentBase = Base.Decimal;
         this.data = data;
     }
 
-    public void setBase(Base newBase) {
-        currentBase = newBase;
+    public int getCurrentPcRow() {
+        return currentPcRow;
     }
 
     public void setCurrentPcRow(int row) {
-        currentPcRow = row;
+        if (currentPcRow != row) {
+            fireTableRowsUpdated(currentPcRow, currentPcRow);
+            fireTableRowsUpdated(row, row);
+            currentPcRow = row;
+        }
+    }
+
+    @Override
+    public Class<?> getColumnClass(int col) {
+        return columnClasses[col];
     }
 
     @Override
@@ -39,12 +48,16 @@ public class ProgramTableModel extends GenericTableModel {
         return columnNames.length;
     }
 
+    private static final String ARROW = "\u279c";
+    private static final String EMPTY = "";
+
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (currentBase == Base.Decimal) {
+        if (columnIndex == 0) {
+            return rowIndex == currentPcRow ? ARROW : EMPTY;
+        }
+        else if (getBase() == Base.Decimal) {
             switch (columnIndex) {
-                case 0:
-                    return rowIndex == currentPcRow ? "->" : "";
                 case 1:
                     return Integer.toString(rowIndex);
                 case 2:
@@ -52,21 +65,19 @@ public class ProgramTableModel extends GenericTableModel {
                 case 3:
                     return "Não implementado";
                 default:
-                    return "";
+                    return EMPTY;
             }
         }
         else {
             switch (columnIndex) {
-                case 0:
-                    return rowIndex == currentPcRow ? "->" : "";
                 case 1:
-                    return Integer.toHexString(rowIndex);
+                    return Integer.toHexString(rowIndex).toUpperCase();
                 case 2:
-                    return Integer.toHexString(0xFF & data[rowIndex]);
+                    return Integer.toHexString(0xFF & data[rowIndex]).toUpperCase();
                 case 3:
                     return "Não implementado";
                 default:
-                    return "";
+                    return EMPTY;
             }
         }
     }

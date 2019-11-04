@@ -5,6 +5,8 @@ import java.awt.GridBagLayout;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 
 import cesar.gui.displays.DigitalDisplay;
 import cesar.utils.Defaults;
@@ -59,7 +61,9 @@ public class ExecutionPanel extends JPanel {
         c_3.anchor = GridBagConstraints.EAST;
         add(instructionDisplay, c_3);
 
-        setBorder(Defaults.createTitledBorder("Execução:"));
+        Border outer = Defaults.createTitledBorder("Execução:");
+        Border inner = Defaults.createEmptyBorder();
+        setBorder(new CompoundBorder(outer, inner));
     }
 
 

@@ -6,6 +6,7 @@ import javax.swing.Box;
 import javax.swing.JPanel;
 
 import cesar.gui.displays.RegisterDisplay;
+import cesar.hardware.Base;
 
 public class RegisterPanel extends JPanel {
     private static final long serialVersionUID = 2962079321929645473L;
@@ -31,6 +32,12 @@ public class RegisterPanel extends JPanel {
         add(Box.createHorizontalGlue());
         add(registerDisplays[7]);
         doLayout();
+    }
+
+    public void setBase(Base base) {
+        for (final RegisterDisplay display : registerDisplays) {
+            display.setBase(base);
+        }
     }
 
     public RegisterDisplay[] getDisplays() {

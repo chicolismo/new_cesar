@@ -1,7 +1,6 @@
 package cesar.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -10,12 +9,14 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -23,6 +24,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -36,11 +38,13 @@ import cesar.gui.panels.ExecutionPanel;
 import cesar.gui.panels.InstructionPanel;
 import cesar.gui.panels.RegisterPanel;
 import cesar.gui.panels.StatusBar;
+import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
+import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
-import cesar.gui.tables.Table;
 import cesar.hardware.Base;
 import cesar.hardware.Cpu;
+import cesar.utils.Shorts;
 
 public class MainWindow extends JFrame {
     private static final long serialVersionUID = 8690285431269859830L;
@@ -51,6 +55,8 @@ public class MainWindow extends JFrame {
     private final ProgramTableModel programModel;
     private final DataTableModel dataModel;
     private final SideWindow<ProgramTableModel> programWindow;
+    private final ProgramTable programTable;
+    private final DataTable dataTable;
     private final SideWindow<DataTableModel> dataWindow;
     private final TextWindow textWindow;
     private final RegisterPanel registerPanel;
@@ -65,6 +71,7 @@ public class MainWindow extends JFrame {
     public MainWindow() {
         super("Cesar");
         setResizable(false);
+        setFocusable(true);
         setAutoRequestFocus(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
@@ -78,10 +85,14 @@ public class MainWindow extends JFrame {
         memory = cpu.getMemory();
 
         programModel = new ProgramTableModel(cpu.getMemory());
-        programWindow = new SideWindow<>(this, "Programa", new Table<ProgramTableModel>(programModel));
+        programWindow = new SideWindow<>(this, "Programa", new ProgramTable(programModel));
+        programTable = (ProgramTable) programWindow.getTable();
+        programWindow.setFocusable(true);
 
         dataModel = new DataTableModel(cpu.getMemory());
-        dataWindow = new SideWindow<>(this, "Dados", new Table<DataTableModel>(dataModel));
+        dataWindow = new SideWindow<>(this, "Dados", new DataTable(dataModel));
+        dataTable = (DataTable) dataWindow.getTable();
+        dataWindow.setFocusable(true);
 
         textWindow = new TextWindow(this, cpu.getMemory());
 
@@ -103,14 +114,9 @@ public class MainWindow extends JFrame {
         initMenu();
         initEvents();
         pack();
-        setMinimumSize(getSize());
     }
 
     private void initLayout() {
-        programWindow.setVisible(true);
-        dataWindow.setVisible(true);
-        textWindow.setVisible(true);
-
         JPanel middlePanel = new JPanel();
         GridBagLayout middleGrid = new GridBagLayout();
         middleGrid.columnWidths = new int[] { 0, 0 };
@@ -188,12 +194,55 @@ public class MainWindow extends JFrame {
     }
 
     void initEvents() {
-        final Component parent = this;
-
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentMoved(ComponentEvent e) {
                 updatePositions();
+            }
+        });
+
+        MouseAdapter mouseAdapter = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                event.getComponent().requestFocus();
+            }
+        };
+
+        addMouseListener(mouseAdapter);
+        programWindow.addMouseListener(mouseAdapter);
+        dataWindow.addMouseListener(mouseAdapter);
+        textWindow.addMouseListener(mouseAdapter);
+
+        KeyAdapter keyAdapter = new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                onKeyTyped(e.getKeyChar());
+            }
+        };
+
+        addKeyListener(keyAdapter);
+        programWindow.addKeyListener(keyAdapter);
+        dataWindow.addKeyListener(keyAdapter);
+        textWindow.addKeyListener(keyAdapter);
+
+        programWindow.getInput().addActionListener((event) -> {
+            try {
+                final int address = Integer.parseInt(programWindow.getLabelText(), Base.toInt(currentBase));
+                final byte value = (byte) (0xFF
+                    & Integer.parseInt(programWindow.getInputText(), Base.toInt(currentBase)));
+                onTextInput(address, value);
+            }
+            catch (NumberFormatException e) {
+            }
+        });
+
+        dataWindow.getInput().addActionListener((event) -> {
+            try {
+                final int address = Integer.parseInt(dataWindow.getLabelText(), Base.toInt(currentBase));
+                final byte value = (byte) (0xFF & Integer.parseInt(dataWindow.getInputText(), Base.toInt(currentBase)));
+                onTextInput(address, value);
+            }
+            catch (NumberFormatException e) {
             }
         });
 
@@ -207,9 +256,26 @@ public class MainWindow extends JFrame {
                 }
             });
         }
+
+        final JToggleButton btnDec = buttonPanel.getDecButton();
+        final JToggleButton btnHex = buttonPanel.getHexButton();
+        final JButton btnNext = buttonPanel.getNextButton();
+
+        btnDec.addActionListener((event) -> {
+            onSetBase(Base.Decimal);
+        });
+
+        btnHex.addActionListener((event) -> {
+            onSetBase(Base.Hexadecimal);
+        });
+        btnDec.doClick();
+
+        btnNext.addActionListener((event) -> {
+            onNext();
+        });
     }
 
-    void updatePositions() {
+    public void updatePositions() {
         int gap = 10;
         int width = getWidth();
         int height = getHeight();
@@ -218,12 +284,19 @@ public class MainWindow extends JFrame {
         programWindow.setLocation(location.x - programDim.width - gap, location.y);
         dataWindow.setLocation(location.x + width + gap, location.y);
         textWindow.setLocation(location.x - programDim.width - gap, location.y + height + gap);
-
         programWindow.setSize(programDim.width, height);
         dataWindow.setSize(dataWindow.getWidth(), height);
     }
 
-    public void onTextInput(int address, byte value) {
+    private void onNext() {
+        short value = (short) (cpu.getRegisterValue(7) + 1);
+        cpu.setRegisterValue(7, value);
+        int row = Shorts.toUnsignedInt(value);
+        programModel.setCurrentPcRow(row);
+        programTable.scrollToRow(row);
+    }
+
+    private void onTextInput(int address, byte value) {
         memory[address] = value;
         programModel.fireTableCellUpdated(address, 2);
         dataModel.fireTableCellUpdated(address, 1);
@@ -232,7 +305,7 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void onRegisterDisplayDoubleClick(RegisterDisplay display) {
+    private void onRegisterDisplayDoubleClick(RegisterDisplay display) {
         int registerNumber = display.getNumber();
         short regValue = cpu.getRegisterValue(registerNumber);
         String message = String.format("Digite novo valor do R%d", registerNumber);
@@ -245,9 +318,25 @@ public class MainWindow extends JFrame {
                 display.setValue(value);
             }
             catch (NumberFormatException e) {
-                // Do nothing.
             }
         }
+    }
+
+    private void onSetBase(Base base) {
+        if (currentBase != base) {
+            currentBase = base;
+            programWindow.setBase(base);
+            dataWindow.setBase(base);
+            registerPanel.setBase(base);
+        }
+    }
+
+    private void onKeyTyped(char key) {
+        // TODO: Colocar o valor no endereço do teclado e indicar que
+        // o teclado foi lido.
+        cpu.setLastTypedChar(key);
+        programModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+        dataModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
     }
 
     public void onFileOpen() {
@@ -259,5 +348,24 @@ public class MainWindow extends JFrame {
 
     public void onFileSave() {
 
+    }
+
+    public void onExit() {
+        // TODO: Verifica se houve mudanças no arquivo atual e oferece salvar.
+        System.exit(0);
+    }
+
+    private void centerOnScreen() {
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
+    }
+
+    public void initializePositions() {
+        centerOnScreen();
+        updatePositions();
+        programWindow.setVisible(true);
+        dataWindow.setVisible(true);
+        textWindow.setVisible(true);
+        dataTable.scrollToRow(6000, true);
     }
 }

@@ -1,38 +1,37 @@
 package cesar;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.Frame;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import cesar.gui.MainWindow;
 
 public class Main {
-    private static void centerWindowOnScreen(MainWindow window) {
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        window.setLocation(dim.width / 2 - window.getSize().width / 2, dim.height / 2 - window.getSize().height / 2);
-    }
-
     public static void main(String[] args) {
-
         try {
-            // Set cross-platform Java L&F (also called "Metal")
-            // UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            for (final LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+//                if ("Metal".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
         }
-        catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
-            | IllegalAccessException e) {
-            System.err.println(e.getMessage());
+        catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+            | UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
         }
 
 
         SwingUtilities.invokeLater(() -> {
             MainWindow window = new MainWindow();
-            centerWindowOnScreen(window);
             window.setVisible(true);
+            window.initializePositions();
         });
     }
 }

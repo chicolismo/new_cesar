@@ -4,6 +4,7 @@ import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 public class Defaults {
@@ -16,11 +17,19 @@ public class Defaults {
     private Defaults() {
     }
 
-    public static TitledBorder createTitledBorder(String title) {
+    public static Border createEmptyBorder() {
+        return createEmptyBorder(4);
+    }
+
+    public static Border createEmptyBorder(int padding) {
+        return BorderFactory.createEmptyBorder(padding, padding, padding, padding);
+    }
+
+    public static Border createTitledBorder(String title) {
         return createTitledBorder(title, TitledBorder.LEFT);
     }
 
-    public static TitledBorder createTitledBorder(String title, int align) {
+    public static Border createTitledBorder(String title, int align) {
         TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title, align,
             TitledBorder.CENTER);
         border.setTitleFont(DEFAULT_FONT);

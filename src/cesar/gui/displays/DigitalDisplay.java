@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 import cesar.hardware.Base;
+import cesar.utils.Shorts;
 
 public class DigitalDisplay extends JPanel {
     private static final long serialVersionUID = 7750416402778310401L;
@@ -82,13 +83,14 @@ public class DigitalDisplay extends JPanel {
 
         int x = START_X;
         int currentDigit = 0;
-        int n = 0xFFFF & value;
+        int n = Shorts.toUnsignedInt(value);
+        int base = Base.toInt(currentBase);
         do {
-            int digit = n % 10;
+            int digit = n % base;
             g.drawImage(displayImages[digit], x, START_Y, DIGIT_WIDTH, DIGIT_HEIGHT, null);
             x -= DIGIT_OFFSET;
             ++currentDigit;
-            n /= Base.toInt(currentBase);
+            n /= base;
         } while (n > 0);
 
         while (currentDigit < numberOfDigits) {

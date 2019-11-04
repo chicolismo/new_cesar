@@ -50,6 +50,22 @@ public class ButtonPanel extends JPanel {
         initLayout();
     }
 
+    public JToggleButton getDecButton() {
+        return btnDec;
+    }
+
+    public JToggleButton getHexButton() {
+        return btnHex;
+    }
+
+    public JToggleButton getRunButton() {
+        return btnRun;
+    }
+
+    public JButton getNextButton() {
+        return btnNext;
+    }
+
     private void initLayout() {
         BoxLayout box = new BoxLayout(this, BoxLayout.X_AXIS);
         setLayout(box);
@@ -57,6 +73,11 @@ public class ButtonPanel extends JPanel {
         btnHex.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
         btnRun.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
         btnNext.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
+
+        btnDec.setFocusable(false);
+        btnHex.setFocusable(false);
+        btnRun.setFocusable(false);
+        btnNext.setFocusable(false);
 
         Font font = new Font(Font.MONOSPACED, Font.PLAIN, 10);
         Insets margins = new Insets(0, 0, 0, 0);

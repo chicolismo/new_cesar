@@ -1,12 +1,13 @@
 package cesar.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -27,38 +28,40 @@ import cesar.utils.Shorts;
 public class SideWindow<T extends GenericTableModel> extends JDialog {
     private static final long serialVersionUID = -8367017002876264050L;
 
+    private int currentlySelectedRow;
+    private final JScrollPane scrollPane;
     Base currentBase;
-    JLabel label;
-    JTextField input;
-    Table<T> table;
+    private final JLabel label;
+    private final JTextField input;
+    private final Table<T> table;
 
     public SideWindow(MainWindow parent, String title, Table<T> table) {
         super(parent, title);
         setType(Window.Type.UTILITY);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
+        this.currentlySelectedRow = 0;
         this.currentBase = Base.Decimal;
         this.label = new JLabel("0");
         this.input = new JTextField(5);
         this.table = table;
+        this.scrollPane = new JScrollPane(table);
 
         initLayout();
+        pack();
         initEvents();
     }
 
     private void initLayout() {
         JPanel panel = new JPanel();
         setContentPane(panel);
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(scrollPane.getPreferredSize());
-
         panel.add(scrollPane, BorderLayout.CENTER);
+
+        scrollPane.setPreferredSize(table.getPreferredSize());
 
         JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
         inputPanel.add(label);
         inputPanel.add(input);
-
 
         GridBagLayout grid = new GridBagLayout();
         grid.columnWidths = new int[] { 0 };
@@ -83,23 +86,28 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
         pack();
     }
 
-    private void initEvents() {
-        MainWindow parent = (MainWindow) getParent();
+    public String getLabelText() {
+        return label.getText();
+    }
 
-        // TODO: Continuar aqui...
-        input.addActionListener(new ActionListener() {
+    public String getInputText() {
+        return input.getText();
+    }
+
+    public JTextField getInput() {
+        return input;
+    }
+
+    public Table<T> getTable() {
+        return table;
+    }
+
+    private void initEvents() {
+        addComponentListener(new ComponentAdapter() {
             @Override
-            public void actionPerformed(ActionEvent event) {
-                String labelText = label.getText();
-                String inputText = input.getText();
-                try {
-                    final int address = Integer.parseInt(labelText, Base.toInt(currentBase));
-                    final byte value = (byte) (0xFF & Integer.parseInt(inputText, Base.toInt(currentBase)));
-                    parent.onTextInput(address, value);
-                }
-                catch (NumberFormatException e) {
-                    // Do nothing.
-                }
+            public void componentResized(ComponentEvent e) {
+                setSize(new Dimension(getPreferredSize().width, getHeight()));
+                super.componentResized(e);
             }
         });
 
@@ -110,10 +118,8 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
                 if (!selectionModel.getValueIsAdjusting()) {
                     int row = selectionModel.getMaxSelectionIndex();
                     if (row != -1) {
-                        short address = (short) row;
-                        byte value = table.getValue(row);
-                        label.setText(Integer.toString(Shorts.toUnsignedInt(address), Base.toInt(currentBase)));
-                        input.setText(Integer.toString(Bytes.toUnsignedInt(value), Base.toInt(currentBase)));
+                        currentlySelectedRow = row;
+                        updateLabelAndInputValues(row);
                         input.requestFocus();
                         input.selectAll();
                     }
@@ -122,7 +128,18 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
         });
     }
 
-    public void setBase(Base newBase) {
-        currentBase = newBase;
+    private void updateLabelAndInputValues(int row) {
+        short address = (short) row;
+        byte value = table.getValue(row);
+        label.setText(Integer.toString(Shorts.toUnsignedInt(address), Base.toInt(currentBase)).toUpperCase());
+        input.setText(Integer.toString(Bytes.toUnsignedInt(value), Base.toInt(currentBase)).toUpperCase());
+    }
+
+    public void setBase(Base base) {
+        if (currentBase != base) {
+            currentBase = base;
+            table.setBase(base);
+            updateLabelAndInputValues(currentlySelectedRow);
+        }
     }
 }

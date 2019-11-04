@@ -4,14 +4,18 @@ import cesar.hardware.Base;
 
 public class DataTableModel extends GenericTableModel {
     private static final long serialVersionUID = -8479421195862323724L;
+    private Class<?>[] columnClasses = new Class<?>[] { Byte.class, Byte.class };
 
     private static final String[] columnNames = new String[] { "Endereço", "Valor" };
     private byte[] data;
-    private Base currentBase;
 
     public DataTableModel(byte[] data) {
         this.data = data;
-        this.currentBase = Base.Decimal;
+    }
+
+    @Override
+    public Class<?> getColumnClass(int col) {
+        return columnClasses[col];
     }
 
     @Override
@@ -31,7 +35,7 @@ public class DataTableModel extends GenericTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (currentBase == Base.Decimal) {
+        if (getBase() == Base.Decimal) {
             if (columnIndex == 0) {
                 return Integer.toString(rowIndex);
             }
@@ -41,10 +45,10 @@ public class DataTableModel extends GenericTableModel {
         }
         else {
             if (columnIndex == 0) {
-                return Integer.toHexString(rowIndex);
+                return Integer.toHexString(rowIndex).toUpperCase();
             }
             else {
-                return Integer.toHexString(0xFF & data[rowIndex]);
+                return Integer.toHexString(0xFF & data[rowIndex]).toUpperCase();
             }
         }
     }
@@ -53,5 +57,4 @@ public class DataTableModel extends GenericTableModel {
     public byte getValue(int row) {
         return data[row];
     }
-
 }

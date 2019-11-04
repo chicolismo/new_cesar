@@ -3,21 +3,30 @@ package cesar.gui.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 
 import cesar.utils.Defaults;
 
 public class InstructionPanel extends JPanel {
     private static final long serialVersionUID = -7005281883928099202L;
 
-    final private JTextField riTextField;
-    final private JTextField mnemTextField;
+    final private JLabel riText;
+    final private JLabel mnemText;
 
     public InstructionPanel() {
-        riTextField = new JTextField();
-        mnemTextField = new JTextField();
+        riText = new JLabel("Vai tomar no cu ");
+        mnemText = new JLabel("MOV R3 R4");
+
+        Border border = new CompoundBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED),
+            BorderFactory.createEmptyBorder(1, 1, 1, 1));
+
+        riText.setBorder(border);
+        mnemText.setBorder(border);
 
         initLayout();
     }
@@ -49,14 +58,16 @@ public class InstructionPanel extends JPanel {
         c_2.gridx = 1;
         c_2.gridy = 0;
         c_2.fill = GridBagConstraints.BOTH;
-        add(riTextField, c_2);
+        add(riText, c_2);
 
         GridBagConstraints c_3 = new GridBagConstraints();
         c_3.gridx = 1;
         c_3.gridy = 1;
         c_3.fill = GridBagConstraints.BOTH;
-        add(mnemTextField, c_3);
+        add(mnemText, c_3);
 
-        setBorder(Defaults.createTitledBorder("Instrução:"));
+        Border outer = Defaults.createTitledBorder("Instrução:");
+        Border border = new CompoundBorder(outer, Defaults.createEmptyBorder());
+        setBorder(border);
     }
 }

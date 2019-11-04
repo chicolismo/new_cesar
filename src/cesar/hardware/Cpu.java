@@ -11,6 +11,8 @@ public class Cpu {
     public static final int MEMORY_SIZE = 1 << 16;
     public static final int BEGIN_DISPLAY_ADDRESS = 65500;
     public static final int END_DISPLAY_ADDRESS = 65535;
+    public static final int KEYBOARD_STATE_ADDRESS = 65498;
+    public static final int LAST_CHAR_ADDRESS = 65499;
 
     private static final int PC = 7;
 
@@ -35,6 +37,12 @@ public class Cpu {
 
     public void setRegisterValue(int registerNumber, short newValue) {
         registers[registerNumber] = newValue;
+    }
+
+    // 65499
+    public void setLastTypedChar(char c) {
+        memory[KEYBOARD_STATE_ADDRESS] = (byte) 0x80;
+        memory[LAST_CHAR_ADDRESS] = (byte) c;
     }
 
     public byte[] getMemory() {
