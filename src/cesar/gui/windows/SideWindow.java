@@ -145,4 +145,10 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
             updateLabelAndInputValues(currentlySelectedRow);
         }
     }
+
+    public void selectNextRow() {
+        currentlySelectedRow = 0xFFFF & (currentlySelectedRow + 1);
+        table.setRowSelectionInterval(currentlySelectedRow, currentlySelectedRow);
+        table.scrollToRow(currentlySelectedRow);
+    }
 }

@@ -16,7 +16,12 @@ public class Mnemonic {
         return n + z + o + v;
     }
 
-    public static void updateMnemonics(final byte[] memory, final String[] mnemonics, final int startAt) {
+    public static int updateMnemonics(final byte[] memory, final String[] mnemonics, final int startAt) {
+        return updateMnemonics(memory, mnemonics, startAt, false);
+    }
+
+    public static int updateMnemonics(final byte[] memory, final String[] mnemonics, final int startAt,
+        boolean refreshAll) {
         int row = startAt;
 
         /*
@@ -105,6 +110,10 @@ public class Mnemonic {
                     }
                     else {
                         mnemonic = String.format(format, register, addressMode.toString(rrr));
+                    }
+
+                    if (addressMode.isPostIncremented() && rrr == Cpu.PC) {
+                        increment += 2;
                     }
                     break;
                 }
@@ -202,18 +211,25 @@ public class Mnemonic {
                     mnemonic = Instruction.NOP.getFormatString();
             }
 
-            if (mnemonics[row] == null || !mnemonics[row].equals(mnemonic)) {
-                // System.out.println(mnemonic + " " + increment);
+            if (refreshAll) {
                 mnemonics[row] = mnemonic;
                 for (int j = 1; j < increment; ++j) {
                     mnemonics[0xFFFF & (row + j)] = "";
                 }
             }
             else {
-                break;
+                if (mnemonics[row] == null || !mnemonics[row].equals(mnemonic)) {
+                    mnemonics[row] = mnemonic;
+                    for (int j = 1; j < increment; ++j) {
+                        mnemonics[0xFFFF & (row + j)] = "";
+                    }
+                }
+                else {
+                    break;
+                }
             }
-
             row += increment;
         }
+        return row;
     }
 }

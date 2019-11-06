@@ -16,7 +16,7 @@ import javax.swing.table.JTableHeader;
 
 import cesar.hardware.Base;
 
-public class Table<Model extends GenericTableModel> extends JTable {
+public abstract class Table<Model extends GenericTableModel> extends JTable {
     private static final long serialVersionUID = -7370177993874174121L;
 
     public Table(Model model) {
@@ -51,7 +51,11 @@ public class Table<Model extends GenericTableModel> extends JTable {
 
         final ListSelectionModel selectionModel = getSelectionModel();
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        updateColumnWidths();
     }
+
+    abstract void updateColumnWidths();
 
     public byte getValue(int address) {
         return ((GenericTableModel) getModel()).getValue(address);

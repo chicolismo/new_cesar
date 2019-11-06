@@ -8,16 +8,25 @@ public class DataTable extends Table<DataTableModel> {
 
     public DataTable(DataTableModel model) {
         super(model);
+    }
 
+    @Override
+    void updateColumnWidths() {
         TableColumnModel columnModel = getColumnModel();
         columnModel.setColumnSelectionAllowed(false);
 
+        int col_0 = 80;
+        int col_1 = 50;
+
         TableColumn col;
         col = columnModel.getColumn(0);
-        col.setPreferredWidth(80);
+        col.setMinWidth(col_0);
+        col.setMaxWidth(col_0);
+        col.setPreferredWidth(col_0);
 
         col = columnModel.getColumn(1);
-        col.setPreferredWidth(50);
+        col.setMinWidth(col_1);
+        col.setMaxWidth(col_1);
+        col.setPreferredWidth(col_1);
     }
-
 }

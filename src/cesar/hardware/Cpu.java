@@ -1,10 +1,5 @@
 package cesar.hardware;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-
 import cesar.utils.Shorts;
 
 public class Cpu {
@@ -59,6 +54,9 @@ public class Cpu {
      * terminar alguma <i>thread</i> que esteja executando diversas instruções.
      */
     boolean halted;
+
+    public int firstChangedRow;
+    public int lastChangedRow;
 
     public Cpu() {
         registers = new short[8];
@@ -120,6 +118,12 @@ public class Cpu {
         for (int i = offset; i < max; ++i) {
             memory[i - offset] = bytes[i];
         }
+    }
+
+    public void setMemoryAt(final int address, final byte value) {
+        memory[0xFFFF & address] = value;
+        firstChangedRow = value;
+        lastChangedRow = Mnemonic.updateMnemonics(memory, mnemonics, address);
     }
 
     public static boolean isDisplayAddress(final int address) {
@@ -480,23 +484,8 @@ public class Cpu {
         return Shorts.fromBytes(msb, lsb);
     }
 
-    /**
-     * Dado um nome de arquivo binário, tenta copiar seus dados para a memória do
-     * cpu. Se o arquivo for maior que a capacidade da memória, apenas os últimos
-     * <i>n</i> bytes são lidos, onde <i>n</i> é o tamanho da memória.
-     * 
-     * @param filename O nome do arquivo a ser lido.
-     * @throws IOException Se por qualquer motivo não for possível ler o arquivo
-     *                     cujo nome foi fornecido, essa exceção será lançada.
-     */
-    public void readBinaryFile(String filename) throws IOException {
-        File file = new File(filename);
-        FileInputStream fileInputStream = new FileInputStream(file);
-
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream)) {
-            var buffer = bufferedInputStream.readAllBytes();
-            setMemory(buffer);
-            Mnemonic.updateMnemonics(memory, mnemonics, 0);
-        }
+    public void setBytes(final byte[] bytes) {
+        setMemory(bytes);
+        Mnemonic.updateMnemonics(memory, mnemonics, 0, true);
     }
 }

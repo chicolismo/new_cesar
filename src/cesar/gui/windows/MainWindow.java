@@ -14,14 +14,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -33,7 +31,6 @@ import javax.swing.KeyStroke;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import cesar.gui.displays.RegisterDisplay;
 import cesar.gui.panels.ButtonPanel;
@@ -54,30 +51,31 @@ import cesar.utils.Shorts;
 public class MainWindow extends JFrame {
     private static final long serialVersionUID = 8690285431269859830L;
 
-    private final Cpu cpu;
-    private final byte[] memory;
-    private final ConditionRegister conditionRegister;
-    private final JPanel panel;
-    private final ProgramTableModel programModel;
-    private final DataTableModel dataModel;
-    private final SideWindow<ProgramTableModel> programWindow;
-    private final ProgramTable programTable;
-    private final DataTable dataTable;
-    private final SideWindow<DataTableModel> dataWindow;
-    private final TextWindow textWindow;
-    private final RegisterPanel registerPanel;
-    private final RegisterDisplay[] registerDisplays;
-    private final ExecutionPanel executionPanel;
-    private final InstructionPanel instructionPanel;
-    private final ConditionPanel conditionPanel;
-    private final ButtonPanel buttonPanel;
-    private final JFileChooser fileChooser;
-    private final StatusBar statusBar;
-    private final JToggleButton runButton;
-    private final JButton nextButton;
-    private final HashMap<String, Component> components;
-    private boolean programIsRunning;
-    private Base currentBase;
+    final Cpu cpu;
+    final byte[] memory;
+    final ConditionRegister conditionRegister;
+    final JPanel panel;
+    final ProgramTableModel programModel;
+    final DataTableModel dataModel;
+    final SideWindow<ProgramTableModel> programWindow;
+    final ProgramTable programTable;
+    final DataTable dataTable;
+    final SideWindow<DataTableModel> dataWindow;
+    final TextWindow textWindow;
+    final RegisterPanel registerPanel;
+    final RegisterDisplay[] registerDisplays;
+    final ExecutionPanel executionPanel;
+    final InstructionPanel instructionPanel;
+    final ConditionPanel conditionPanel;
+    final ButtonPanel buttonPanel;
+
+    final BinaryFileManager fileManager;
+    final StatusBar statusBar;
+    final JToggleButton runButton;
+    final JButton nextButton;
+    final HashMap<String, Component> components;
+    boolean programIsRunning;
+    Base currentBase;
 
     public MainWindow() {
         super("Cesar");
@@ -121,10 +119,7 @@ public class MainWindow extends JFrame {
         statusBar = new StatusBar();
         statusBar.setText("Bem-vindos");
 
-        fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(false);
-        FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("Arquivos do Cesar", "mem");
-        fileChooser.setFileFilter(fileFilter);
+        fileManager = new BinaryFileManager(this);
 
         initLayout();
         initMenu();
@@ -182,15 +177,31 @@ public class MainWindow extends JFrame {
 
         JMenu fileMenu = new JMenu("Arquivo");
 
-        JMenuItem fileOpen = new JMenuItem("Abrir", KeyEvent.VK_A);
-        fileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, commandKey));
-        fileOpen.addActionListener((e) -> onFileOpen());
+        JMenuItem fileOpen = new JMenuItem("Carregar...");
+        fileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, commandKey));
+        fileOpen.addActionListener((e) -> fileManager.openFile());
         fileMenu.add(fileOpen);
 
-        JMenuItem fileSave = new JMenuItem("Salvar", KeyEvent.VK_S);
+        JMenuItem fileOpenPartially = new JMenuItem("Carga Parcial...");
+        fileOpenPartially.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, commandKey));
+        fileOpenPartially.addActionListener((e) -> fileManager.openFilePartially());
+        fileMenu.add(fileOpenPartially);
+
+        JMenuItem fileSave = new JMenuItem("Salvar...");
         fileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, commandKey));
-        fileSave.addActionListener((e) -> onFileSave());
+        fileSave.addActionListener((e) -> fileManager.saveFile());
         fileMenu.add(fileSave);
+
+        JMenuItem fileSaveText = new JMenuItem("Salvar Texto...");
+        fileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, commandKey));
+        fileSave.addActionListener((e) -> fileManager.saveTextFile());
+        fileMenu.add(fileSaveText);
+
+        fileMenu.addSeparator();
+
+        JMenuItem fileExit = new JMenuItem("Sair");
+        fileExit.addActionListener((e) -> onExit());
+        fileMenu.add(fileExit);
 
         JMenu editMenu = new JMenu("Editar");
 
@@ -257,6 +268,7 @@ public class MainWindow extends JFrame {
                 final byte value = (byte) (0xFF
                     & Integer.parseInt(programWindow.getInputText(), Base.toInt(currentBase)));
                 onTextInput(address, value);
+                programWindow.selectNextRow();
             }
             catch (NumberFormatException e) {
             }
@@ -267,6 +279,7 @@ public class MainWindow extends JFrame {
                 final int address = Integer.parseInt(dataWindow.getLabelText(), Base.toInt(currentBase));
                 final byte value = (byte) (0xFF & Integer.parseInt(dataWindow.getInputText(), Base.toInt(currentBase)));
                 onTextInput(address, value);
+                dataWindow.selectNextRow();
             }
             catch (NumberFormatException e) {
             }
@@ -358,6 +371,23 @@ public class MainWindow extends JFrame {
         return programIsRunning;
     }
 
+    private void centerOnScreen() {
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
+    }
+
+    public void initializePositions() {
+        centerOnScreen();
+        updatePositions();
+        programWindow.setVisible(true);
+        dataWindow.setVisible(true);
+        textWindow.setVisible(true);
+        dataTable.scrollToRow(1024, true);
+    }
+
+    // =========================================================================
+    // Ações
+    // =========================================================================
     private void onRun() {
         JMenuItem executionRun = (JMenuItem) components.get("executionRun");
 
@@ -410,7 +440,9 @@ public class MainWindow extends JFrame {
     }
 
     private void onTextInput(int address, byte value) {
-        memory[address] = value;
+        // TODO. Criar um método que atualiza a memória do cpu sem computar acessos, e
+        // que dispara a atualização dos mnemônicos.
+        memory[0xFFFF & address] = value;
         programModel.fireTableCellUpdated(address, 2);
         dataModel.fireTableCellUpdated(address, 1);
         if (Cpu.isDisplayAddress((short) address)) {
@@ -452,44 +484,11 @@ public class MainWindow extends JFrame {
         dataModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
     }
 
-    public void onFileOpen() {
-        // TODO: Verificar se o arquivo atual foi modificado.
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            String fileName = fileChooser.getSelectedFile().getAbsolutePath();
-            try {
-                cpu.readBinaryFile(fileName);
-                // Atualiza a interface
-                programModel.fireTableRowsUpdated(-1, -1);
-                dataModel.fireTableRowsUpdated(-1, -1);
-                repaintAll();
-            }
-            catch (IOException e) {
-                JOptionPane.showMessageDialog(this, String.format("Erro ao ler o arquivo %s", fileName),
-                    "Erro de leitura", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    public void onFileSave() {
-
-    }
-
     public void onExit() {
-        // TODO: Verifica se houve mudanças no arquivo atual e oferece salvar.
+        if (fileManager.hasMemoryChanged()) {
+            System.out.println("Memory changed");
+            fileManager.saveBeforeExit();
+        }
         System.exit(0);
-    }
-
-    private void centerOnScreen() {
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation(dim.width / 2 - getSize().width / 2, dim.height / 2 - getSize().height / 2);
-    }
-
-    public void initializePositions() {
-        centerOnScreen();
-        updatePositions();
-        programWindow.setVisible(true);
-        dataWindow.setVisible(true);
-        textWindow.setVisible(true);
-        dataTable.scrollToRow(1024, true);
     }
 }

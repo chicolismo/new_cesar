@@ -12,11 +12,10 @@ import javax.swing.table.TableColumnModel;
 
 public class ProgramTable extends Table<ProgramTableModel> {
     private static final long serialVersionUID = -8843361396327035069L;
+    private static final DefaultTableCellRenderer firstColumnRenderer;
 
-    public ProgramTable(ProgramTableModel model) {
-        super(model);
-
-        DefaultTableCellRenderer firstColumnRenderer = new DefaultTableCellRenderer() {
+    static {
+        firstColumnRenderer = new DefaultTableCellRenderer() {
             private static final long serialVersionUID = -5000064972152807203L;
             private final Font font = new Font(Font.MONOSPACED, Font.BOLD, 20);
 
@@ -30,35 +29,42 @@ public class ProgramTable extends Table<ProgramTableModel> {
                 return this;
             }
         };
+    }
 
+    public ProgramTable(ProgramTableModel model) {
+        super(model);
+    }
+
+    @Override
+    void updateColumnWidths() {
         TableColumnModel columnModel = getColumnModel();
         columnModel.setColumnSelectionAllowed(false);
 
-        int col0 = 30;
-        int col1 = 68;
-        int col2 = 40;
-        int col3 = 160;
+        int col_0 = 30;
+        int col_1 = 68;
+        int col_2 = 40;
+        int col_3 = 160;
 
         TableColumn col;
         col = columnModel.getColumn(0);
-        col.setMinWidth(col0);
-        col.setMaxWidth(col0);
-        col.setPreferredWidth(col0);
+        col.setMinWidth(col_0);
+        col.setMaxWidth(col_0);
+        col.setPreferredWidth(col_0);
         col.setCellRenderer(firstColumnRenderer);
 
         col = columnModel.getColumn(1);
-        col.setMinWidth(col1);
-        col.setMaxWidth(col1);
-        col.setPreferredWidth(col1);
+        col.setMinWidth(col_1);
+        col.setMaxWidth(col_1);
+        col.setPreferredWidth(col_1);
 
         col = columnModel.getColumn(2);
-        col.setMinWidth(col2);
-        col.setMaxWidth(col2);
-        col.setPreferredWidth(col2);
+        col.setMinWidth(col_2);
+        col.setMaxWidth(col_2);
+        col.setPreferredWidth(col_2);
 
         col = columnModel.getColumn(3);
-        col.setMinWidth(col3);
-        col.setMaxWidth(col3);
-        col.setPreferredWidth(col3);
+        col.setMinWidth(col_3);
+        col.setMaxWidth(col_3);
+        col.setPreferredWidth(col_3);
     }
 }
