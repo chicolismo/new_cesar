@@ -12,7 +12,6 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 import cesar.hardware.Base;
-import cesar.utils.Shorts;
 
 public class DigitalDisplay extends JPanel {
     private static final long serialVersionUID = 7750416402778310401L;
@@ -27,7 +26,7 @@ public class DigitalDisplay extends JPanel {
 
     private static final BufferedImage[] displayImages;
     private static final BufferedImage displayNull;
-    private short value;
+    private int unsignedValue;
     private Base currentBase;
     private int numberOfDigits;
 
@@ -62,9 +61,9 @@ public class DigitalDisplay extends JPanel {
         setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     }
 
-    public void setValue(short value) {
-        if (this.value != value) {
-            this.value = value;
+    public void setValue(int unsignedValue) {
+        if (this.unsignedValue != unsignedValue) {
+            this.unsignedValue = unsignedValue;
             repaint();
         }
     }
@@ -83,7 +82,7 @@ public class DigitalDisplay extends JPanel {
 
         int x = START_X;
         int currentDigit = 0;
-        int n = Shorts.toUnsignedInt(value);
+        int n = unsignedValue;
         int base = Base.toInt(currentBase);
         do {
             int digit = n % base;

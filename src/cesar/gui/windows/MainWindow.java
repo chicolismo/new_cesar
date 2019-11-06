@@ -1,6 +1,7 @@
-package cesar.gui;
+package cesar.gui.windows;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -13,10 +14,13 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -43,14 +47,16 @@ import cesar.gui.tables.DataTableModel;
 import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Base;
+import cesar.hardware.ConditionRegister;
 import cesar.hardware.Cpu;
 import cesar.utils.Shorts;
 
 public class MainWindow extends JFrame {
     private static final long serialVersionUID = 8690285431269859830L;
 
-    private Cpu cpu;
-    private byte[] memory;
+    private final Cpu cpu;
+    private final byte[] memory;
+    private final ConditionRegister conditionRegister;
     private final JPanel panel;
     private final ProgramTableModel programModel;
     private final DataTableModel dataModel;
@@ -60,12 +66,17 @@ public class MainWindow extends JFrame {
     private final SideWindow<DataTableModel> dataWindow;
     private final TextWindow textWindow;
     private final RegisterPanel registerPanel;
+    private final RegisterDisplay[] registerDisplays;
     private final ExecutionPanel executionPanel;
     private final InstructionPanel instructionPanel;
     private final ConditionPanel conditionPanel;
     private final ButtonPanel buttonPanel;
     private final JFileChooser fileChooser;
     private final StatusBar statusBar;
+    private final JToggleButton runButton;
+    private final JButton nextButton;
+    private final HashMap<String, Component> components;
+    private boolean programIsRunning;
     private Base currentBase;
 
     public MainWindow() {
@@ -76,17 +87,19 @@ public class MainWindow extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
 
-        currentBase = Base.Decimal;
+        programIsRunning = false;
 
+        components = new HashMap<String, Component>();
+        currentBase = Base.Decimal;
         panel = new JPanel();
-//        setContentPane(panel);
 
         cpu = new Cpu();
         memory = cpu.getMemory();
-
+        conditionRegister = cpu.getConditionRegister();
         programModel = new ProgramTableModel(cpu.getMemory());
         programWindow = new SideWindow<>(this, "Programa", new ProgramTable(programModel));
         programTable = (ProgramTable) programWindow.getTable();
+        programModel.setParent(programTable);
         programWindow.setFocusable(true);
 
         dataModel = new DataTableModel(cpu.getMemory());
@@ -97,9 +110,12 @@ public class MainWindow extends JFrame {
         textWindow = new TextWindow(this, cpu.getMemory());
 
         registerPanel = new RegisterPanel();
+        registerDisplays = registerPanel.getDisplays();
         executionPanel = new ExecutionPanel();
         conditionPanel = new ConditionPanel();
         buttonPanel = new ButtonPanel();
+        runButton = buttonPanel.getRunButton();
+        nextButton = buttonPanel.getNextButton();
         instructionPanel = new InstructionPanel();
 
         statusBar = new StatusBar();
@@ -114,6 +130,7 @@ public class MainWindow extends JFrame {
         initMenu();
         initEvents();
         pack();
+        updateDisplays();
     }
 
     private void initLayout() {
@@ -133,13 +150,13 @@ public class MainWindow extends JFrame {
         GridBagConstraints c_1 = new GridBagConstraints();
         c_1.gridx = 1;
         c_1.gridy = 0;
-        c_1.fill = GridBagConstraints.BOTH;
+        c_1.fill = GridBagConstraints.HORIZONTAL;
         c_1.anchor = GridBagConstraints.NORTHEAST;
         middlePanel.add(conditionPanel, c_1);
         GridBagConstraints c_2 = new GridBagConstraints();
         c_2.gridx = 1;
         c_2.gridy = 1;
-        c_2.fill = GridBagConstraints.BOTH;
+        c_2.fill = GridBagConstraints.HORIZONTAL;
         c_2.anchor = GridBagConstraints.SOUTHEAST;
         middlePanel.add(buttonPanel, c_2);
 
@@ -153,42 +170,51 @@ public class MainWindow extends JFrame {
             BorderFactory.createEmptyBorder(4, 4, 4, 4));
         panel.setBorder(border);
 
-        add(panel, BorderLayout.CENTER);
-        add(statusBar, BorderLayout.SOUTH);
+        getContentPane().add(panel, BorderLayout.CENTER);
+        getContentPane().add(statusBar, BorderLayout.SOUTH);
     }
 
     void initMenu() {
         int commandKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
         JMenuBar menuBar = new JMenuBar();
+        menuBar.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0), "none");
+
         JMenu fileMenu = new JMenu("Arquivo");
 
         JMenuItem fileOpen = new JMenuItem("Abrir", KeyEvent.VK_A);
         fileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, commandKey));
-        fileOpen.addActionListener((e) -> {
-            onFileOpen();
-        });
+        fileOpen.addActionListener((e) -> onFileOpen());
         fileMenu.add(fileOpen);
 
         JMenuItem fileSave = new JMenuItem("Salvar", KeyEvent.VK_S);
         fileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, commandKey));
-        fileSave.addActionListener((e) -> {
-            onFileSave();
-        });
+        fileSave.addActionListener((e) -> onFileSave());
         fileMenu.add(fileSave);
 
         JMenu editMenu = new JMenu("Editar");
 
         JMenu viewMenu = new JMenu("Visualizar");
 
-        JMenu runMenu = new JMenu("Executar");
+        JMenu executionMenu = new JMenu("Executar");
+        JMenuItem executionRun = new JMenuItem("Rodar");
+        components.put("executionRun", executionRun);
+        executionRun.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
+        executionRun.addActionListener((event) -> runButton.doClick());
+        executionMenu.add(executionRun);
+
+        JMenuItem executionStep = new JMenuItem("Passo");
+        executionStep.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0));
+        executionStep.addActionListener((event) -> nextButton.doClick());
+        executionMenu.add(executionStep);
+        executionMenu.addSeparator();
 
         JMenu aboutMenu = new JMenu("?");
 
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
         menuBar.add(viewMenu);
-        menuBar.add(runMenu);
+        menuBar.add(executionMenu);
         menuBar.add(aboutMenu);
         setJMenuBar(menuBar);
     }
@@ -260,19 +286,14 @@ public class MainWindow extends JFrame {
         final JToggleButton btnDec = buttonPanel.getDecButton();
         final JToggleButton btnHex = buttonPanel.getHexButton();
         final JButton btnNext = buttonPanel.getNextButton();
+        final JToggleButton btnRun = buttonPanel.getRunButton();
 
-        btnDec.addActionListener((event) -> {
-            onSetBase(Base.Decimal);
-        });
+        btnDec.addActionListener((event) -> onSetBase(Base.Decimal));
+        btnHex.addActionListener((event) -> onSetBase(Base.Hexadecimal));
+        btnRun.addActionListener((event) -> onRun());
+        btnNext.addActionListener((event) -> onNext());
 
-        btnHex.addActionListener((event) -> {
-            onSetBase(Base.Hexadecimal);
-        });
         btnDec.doClick();
-
-        btnNext.addActionListener((event) -> {
-            onNext();
-        });
     }
 
     public void updatePositions() {
@@ -288,19 +309,111 @@ public class MainWindow extends JFrame {
         dataWindow.setSize(dataWindow.getWidth(), height);
     }
 
+    private void updateDisplays() {
+        updateRegisterDiplays();
+        updateConditionDisplays();
+    }
+
+    private void updateRegisterDiplays() {
+        for (int i = 0; i < 8; ++i) {
+            registerDisplays[i].setValue(cpu.getRegisterValue(i));
+        }
+    }
+
+    private void updateConditionDisplays() {
+        conditionPanel.setNegative(conditionRegister.isNegative());
+        conditionPanel.setZero(conditionRegister.isZero());
+        conditionPanel.setOverflow(conditionRegister.isOverflow());
+        conditionPanel.setCarry(conditionRegister.isCarry());
+    }
+
+    public void repaintAll() {
+        repaint();
+        programWindow.repaint();
+        dataWindow.repaint();
+        textWindow.repaint();
+    }
+
+    public int executeNextInstruction() {
+        final int changedAddress = cpu.executeNextInstruction();
+        if (changedAddress >= 0) {
+            if (Cpu.isDisplayAddress((short) (changedAddress))) {
+                programModel.fireTableRowsUpdated(changedAddress, changedAddress);
+                dataModel.fireTableRowsUpdated(changedAddress, changedAddress);
+            }
+            else {
+                programModel.fireTableRowsUpdated(changedAddress, changedAddress + 1);
+                dataModel.fireTableRowsUpdated(changedAddress, changedAddress + 1);
+            }
+        }
+        updateDisplays();
+        return changedAddress;
+    }
+
+    private synchronized void setIsRunning(boolean isRunning) {
+        programIsRunning = isRunning;
+    }
+
+    private synchronized boolean isRunning() {
+        return programIsRunning;
+    }
+
+    private void onRun() {
+        JMenuItem executionRun = (JMenuItem) components.get("executionRun");
+
+        if (runButton.isSelected()) {
+            runButton.setToolTipText("Parar (F9)");
+            executionRun.setText("Parar");
+        }
+        else {
+            runButton.setToolTipText("Rodar (F9)");
+            executionRun.setText("Rodar");
+        }
+
+        // Se foi clicado
+        if (runButton.isSelected()) {
+            statusBar.clear();
+            cpu.setHalted(false);
+            setIsRunning(true);
+            Thread runThread = new Thread() {
+                @Override
+                public void run() {
+                    while (isRunning()) {
+                        if (!cpu.isHalted()) {
+                            int result = executeNextInstruction();
+                            if (result == Cpu.END_OF_MEMORY || result == Cpu.HALTED) {
+                                statusBar.setText(cpu.getMessage());
+                                runButton.doClick();
+                                break;
+                            }
+                        }
+                    }
+                    repaintAll();
+                    programModel.setCurrentPcRow(Shorts.toUnsignedInt(cpu.getRegisterValue(7)));
+                }
+            };
+            runThread.start();
+        }
+        else {
+            setIsRunning(false);
+            cpu.setHalted(true);
+        }
+    }
+
     private void onNext() {
-        short value = (short) (cpu.getRegisterValue(7) + 1);
-        cpu.setRegisterValue(7, value);
-        int row = Shorts.toUnsignedInt(value);
-        programModel.setCurrentPcRow(row);
-        programTable.scrollToRow(row);
+        cpu.setHalted(false);
+        executeNextInstruction();
+        updateRegisterDiplays();
+        updateConditionDisplays();
+        int pcRow = Shorts.toUnsignedInt(cpu.getRegisterValue(7));
+        programModel.setCurrentPcRow(pcRow);
     }
 
     private void onTextInput(int address, byte value) {
         memory[address] = value;
         programModel.fireTableCellUpdated(address, 2);
         dataModel.fireTableCellUpdated(address, 1);
-        if (cpu.isDisplayAddress((short) address)) {
+        if (Cpu.isDisplayAddress((short) address)) {
             textWindow.repaint();
         }
     }
@@ -342,7 +455,18 @@ public class MainWindow extends JFrame {
     public void onFileOpen() {
         // TODO: Verificar se o arquivo atual foi modificado.
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            JOptionPane.showMessageDialog(this, fileChooser.getSelectedFile().getAbsolutePath());
+            String fileName = fileChooser.getSelectedFile().getAbsolutePath();
+            try {
+                cpu.readBinaryFile(fileName);
+                // Atualiza a interface
+                programModel.fireTableRowsUpdated(-1, -1);
+                dataModel.fireTableRowsUpdated(-1, -1);
+                repaintAll();
+            }
+            catch (IOException e) {
+                JOptionPane.showMessageDialog(this, String.format("Erro ao ler o arquivo %s", fileName),
+                    "Erro de leitura", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -366,6 +490,6 @@ public class MainWindow extends JFrame {
         programWindow.setVisible(true);
         dataWindow.setVisible(true);
         textWindow.setVisible(true);
-        dataTable.scrollToRow(6000, true);
+        dataTable.scrollToRow(1024, true);
     }
 }

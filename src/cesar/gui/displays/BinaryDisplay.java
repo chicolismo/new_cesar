@@ -8,8 +8,6 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-import cesar.utils.Shorts;
-
 public class BinaryDisplay extends JPanel {
     private static final long serialVersionUID = -5490249529061282417L;
 
@@ -22,7 +20,7 @@ public class BinaryDisplay extends JPanel {
     private static final int START_X = 75;
     private static final int START_Y = 0;
     private static final int BITS = 16;
-    private short value;
+    private int unsignedValue;
 
     static {
         displayImages = new BufferedImage[2];
@@ -46,12 +44,12 @@ public class BinaryDisplay extends JPanel {
         setPreferredSize(dim);
         setMaximumSize(dim);
         setMinimumSize(dim);
-        value = (short) 0;
+        unsignedValue = 0;
     }
 
-    public void setValue(short newValue) {
-        if (value != newValue) {
-            value = newValue;
+    public void setValue(int newValue) {
+        if (unsignedValue != newValue) {
+            unsignedValue = newValue;
             repaint();
         }
     }
@@ -59,7 +57,7 @@ public class BinaryDisplay extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        int n = Shorts.toUnsignedInt(value);
+        int n = unsignedValue;
         int x = START_X;
         int currentDigit = 0;
 

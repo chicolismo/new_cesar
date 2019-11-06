@@ -14,10 +14,10 @@ public class DataTable extends Table<DataTableModel> {
 
         TableColumn col;
         col = columnModel.getColumn(0);
-        col.setPreferredWidth(72);
+        col.setPreferredWidth(80);
 
         col = columnModel.getColumn(1);
-        col.setPreferredWidth(46);
+        col.setPreferredWidth(50);
     }
 
 }

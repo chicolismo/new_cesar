@@ -1,4 +1,4 @@
-package cesar.gui;
+package cesar.gui.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -49,6 +49,7 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
 
         initLayout();
         pack();
+        setSize(0, 0);
         initEvents();
     }
 

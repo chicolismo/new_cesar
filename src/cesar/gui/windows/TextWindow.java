@@ -1,4 +1,4 @@
-package cesar.gui;
+package cesar.gui.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Window;

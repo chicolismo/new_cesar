@@ -27,14 +27,21 @@ public class ConditionPanel extends JPanel {
         add(overflow);
         add(Box.createHorizontalGlue());
         add(carry);
+    }
 
-//        setLayout(vbox);
-//        add(negative);
-//        add(Box.createHorizontalGlue());
-//        add(zero);
-//        add(Box.createHorizontalGlue());
-//        add(overflow);
-//        add(Box.createHorizontalGlue());
-//        add(carry);
+    public void setNegative(boolean value) {
+        negative.setValue(value);
+    }
+
+    public void setZero(boolean value) {
+        zero.setValue(value);
+    }
+
+    public void setOverflow(boolean value) {
+        overflow.setValue(value);
+    }
+
+    public void setCarry(boolean value) {
+        carry.setValue(value);
     }
 }

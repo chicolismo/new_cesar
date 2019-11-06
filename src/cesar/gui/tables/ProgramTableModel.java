@@ -10,10 +10,15 @@ public class ProgramTableModel extends GenericTableModel {
 
     private int currentPcRow;
     private byte[] data;
+    private ProgramTable parent;
 
     public ProgramTableModel(byte[] data) {
         this.currentPcRow = 0;
         this.data = data;
+    }
+
+    public void setParent(ProgramTable table) {
+        parent = table;
     }
 
     public int getCurrentPcRow() {
@@ -25,6 +30,7 @@ public class ProgramTableModel extends GenericTableModel {
             fireTableRowsUpdated(currentPcRow, currentPcRow);
             fireTableRowsUpdated(row, row);
             currentPcRow = row;
+            parent.scrollToRow(row);
         }
     }
 

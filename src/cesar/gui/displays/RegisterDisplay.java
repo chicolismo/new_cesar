@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 
 import cesar.hardware.Base;
 import cesar.utils.Defaults;
+import cesar.utils.Shorts;
 
 public class RegisterDisplay extends JPanel {
     private static final long serialVersionUID = 7050289063551512021L;
@@ -49,8 +50,9 @@ public class RegisterDisplay extends JPanel {
     }
 
     public void setValue(short value) {
-        digitalDisplay.setValue(value);
-        binaryDisplay.setValue(value);
+        int unsignedValue = Shorts.toUnsignedInt(value);
+        digitalDisplay.setValue(unsignedValue);
+        binaryDisplay.setValue(unsignedValue);
     }
 
     public int getNumber() {

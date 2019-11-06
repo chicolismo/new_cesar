@@ -7,89 +7,91 @@ public class Alu {
 
     Cpu cpu;
     ConditionRegister cond;
+    short[] registers;
 
-    enum Operation {
+    public enum Operation {
         Plus, Minus
     };
 
     public Alu(Cpu cpu) {
         this.cpu = cpu;
-        cond = cpu.conditionRegister;
+        this.registers = cpu.getRegisters();
+        cond = cpu.getConditionRegister();
     }
 
     void conditionalBranch(final Instruction instruction, final byte offset) {
         switch (instruction) {
             case BR:
-                cpu.registers[PC] += offset;
+                registers[PC] += offset;
                 break;
             case BNE:
                 if (!cond.isZero()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BEQ:
                 if (cond.isZero()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BPL:
                 if (!cond.isNegative()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BMI:
                 if (cond.isNegative()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BVC:
                 if (!cond.isOverflow()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BVS:
                 if (cond.isOverflow()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BCC:
                 if (!cond.isCarry()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BCS:
                 if (cond.isCarry()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BGE:
                 if (cond.isNegative() == cond.isOverflow()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BLT:
                 if (cond.isNegative() != cond.isOverflow()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BGT:
                 if (cond.isNegative() == cond.isOverflow() && !cond.isZero()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BLE:
                 if (cond.isNegative() != cond.isOverflow() || cond.isZero()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BHI:
                 if (!cond.isCarry() && !cond.isZero()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             case BLS:
                 if (cond.isCarry() || cond.isZero()) {
-                    cpu.registers[PC] += offset;
+                    registers[PC] += offset;
                 }
                 break;
             default:
@@ -97,7 +99,7 @@ public class Alu {
         }
     }
 
-    short oneOpernadInstruction(final Instruction instruction, short value) {
+    short oneOperandInstruction(final Instruction instruction, short value) {
         short result = 0;
 
         switch (instruction) {
@@ -113,7 +115,7 @@ public class Alu {
                 result = (short) ~(0xFFFF & value);
                 cond.setNegative(isNegative(result));
                 cond.setZero(isZero(result));
-                cond.setOverflow(true);
+                cond.setOverflow(false);
                 cond.setCarry(true);
                 break;
 
@@ -264,30 +266,30 @@ public class Alu {
         this.cond.setValue((byte) (condition | newCondition));
     }
 
-    void jmp(final AddressMode mode, final short address) {
+    void jmp(final AddressMode mode, final int address) {
         if (mode != AddressMode.Register) {
-            cpu.registers[PC] = address;
+            registers[PC] = (short) (0xFFFF & address);
         }
     }
 
     void sob(final int registerNumber, final byte offset) {
-        if ((--cpu.registers[registerNumber]) != 0) {
-            cpu.registers[PC] -= offset;
+        if ((--registers[registerNumber]) != 0) {
+            registers[PC] -= offset;
         }
     }
 
-    void jsr(final AddressMode mode, short address, int registerNumber) {
+    void jsr(final AddressMode mode, final int address, final int registerNumber) {
         if (mode != AddressMode.Register) {
-            cpu.push(cpu.registers[registerNumber]);
-            cpu.registers[registerNumber] = cpu.registers[PC];
-            cpu.registers[PC] = address;
+            cpu.push(registers[registerNumber]);
+            registers[registerNumber] = registers[PC];
+            registers[PC] = (short) (0xFFFF & address);
         }
     }
 
     void rts(final byte b) {
         int registerNumber = (b & 0b0111);
-        cpu.registers[PC] = cpu.registers[registerNumber];
-        cpu.registers[registerNumber] = cpu.pop();
+        registers[PC] = registers[registerNumber];
+        registers[registerNumber] = cpu.pop();
     }
 
     short mov(final short src) {
@@ -340,30 +342,28 @@ public class Alu {
         return result;
     }
 
-    private boolean isNegative(short value) {
+    boolean isNegative(short value) {
         return value < 0;
     }
 
-    private boolean isZero(short value) {
+    boolean isZero(short value) {
         return value == 0;
     }
 
-    private boolean isOverflow(short a, short b, short c) {
+    boolean isOverflow(short a, short b, short c) {
         return ((a > 0) && (b > 0) && (c < 0)) || ((a < 0) && (b < 0) && (c > 0));
     }
 
-    private boolean isCarry(short a, short b, Operation op) {
-        int ua = (0xFFFF & a);
-        int ub = (0xFFFF & b);
-        int result = 0;
-        switch (op) {
-            case Plus:
-                result = ua + ub;
-                break;
-            case Minus:
-                result = ua - ub;
-                break;
+    private static final int CARRY_MASK = 0x1_0000;
+
+    boolean isCarry(short a, short b, Operation op) {
+        final int ua = Shorts.toUnsignedInt(a);
+        final int ub = Shorts.toUnsignedInt(b);
+        if (op == Operation.Plus) {
+            return ((ua + ub) & CARRY_MASK) == CARRY_MASK;
         }
-        return (result & 0x10000) == 16;
+        else {
+            return ((ua - ub) & CARRY_MASK) == CARRY_MASK;
+        }
     }
 }

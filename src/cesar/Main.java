@@ -9,7 +9,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import cesar.gui.MainWindow;
+import cesar.gui.windows.MainWindow;
 
 public class Main {
     public static void main(String[] args) {
@@ -26,7 +26,6 @@ public class Main {
             | UnsupportedLookAndFeelException ex) {
             Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
         }
-
 
         SwingUtilities.invokeLater(() -> {
             MainWindow window = new MainWindow();
