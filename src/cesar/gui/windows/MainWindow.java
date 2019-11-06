@@ -96,7 +96,7 @@ public class MainWindow extends JFrame {
         cpu = new Cpu();
         memory = cpu.getMemory();
         conditionRegister = cpu.getConditionRegister();
-        programModel = new ProgramTableModel(cpu.getMemory());
+        programModel = new ProgramTableModel(cpu.getMemory(), cpu.getMnemonics());
         programWindow = new SideWindow<>(this, "Programa", new ProgramTable(programModel));
         programTable = (ProgramTable) programWindow.getTable();
         programModel.setParent(programTable);

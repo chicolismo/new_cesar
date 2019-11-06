@@ -112,14 +112,15 @@ public enum Instruction {
 
         FORMAT = new HashMap<Instruction, String>();
         FORMAT.put(NOP, "NOP");
+        FORMAT.put(HLT, "HLT");
         FORMAT.put(CCC, "CCC %s");
         FORMAT.put(SCC, "SCC %s");
         for (final var instruction : Instruction.CONDITIONAL_BRANCH_INSTRUCTIONS) {
             FORMAT.put(instruction, instruction.toString() + " %d");
         }
         FORMAT.put(JMP, "JMP %s"); // modo
-        FORMAT.put(SOB, "SOB %s, %d"); // registrador, ddd
-        FORMAT.put(JSR, "JSR %s, %s"); // registrador, modo
+        FORMAT.put(SOB, "SOB R%d, %d"); // registrador, ddd
+        FORMAT.put(JSR, "JSR R%d, %s"); // registrador, modo
         FORMAT.put(RTS, "RTS R%d"); // registrador
 
         for (final var instruction : Instruction.ONE_OP_INSTRUCTIONS) {

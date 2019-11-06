@@ -18,7 +18,7 @@ public enum AddressMode {
         FORMAT.put(AddressMode.RegisterIndirect, "(R%d)");
         FORMAT.put(AddressMode.PostIncrementedIndirect, "((R%d)+)");
         FORMAT.put(AddressMode.PreDrecrementedIndirect, "(-(R%d))");
-        FORMAT.put(AddressMode.IndexedIndirect, "(%d(%Rd))");
+        FORMAT.put(AddressMode.IndexedIndirect, "(%d(R%d))");
     }
 
     public static AddressMode fromInt(int index) {
@@ -35,5 +35,9 @@ public enum AddressMode {
 
     public boolean isIndexed() {
         return this == Indexed || this == IndexedIndirect;
+    }
+
+    public boolean isPostIncremented() {
+        return this == RegisterPostIncremented || this == PostIncrementedIndirect;
     }
 }

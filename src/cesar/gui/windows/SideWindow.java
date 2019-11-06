@@ -58,7 +58,8 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
         setContentPane(panel);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        scrollPane.setPreferredSize(table.getPreferredSize());
+//        scrollPane.setPreferredSize(table.getPreferredSize());
+        scrollPane.setSize(table.getPreferredSize());
 
         JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
         inputPanel.add(label);
@@ -111,6 +112,7 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
                 super.componentResized(e);
             }
         });
+
 
         ListSelectionModel selectionModel = table.getSelectionModel();
         selectionModel.addListSelectionListener(new ListSelectionListener() {

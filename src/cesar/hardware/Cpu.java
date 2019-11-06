@@ -14,7 +14,7 @@ public class Cpu {
     public static final int KEYBOARD_STATE_ADDRESS = 65498;
     public static final int LAST_CHAR_ADDRESS = 65499;
 
-    private static final int PC = 7;
+    static final int PC = 7;
 
     /**
      * Contém valores dos registradores da Cpu.
@@ -496,6 +496,7 @@ public class Cpu {
         try (BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream)) {
             var buffer = bufferedInputStream.readAllBytes();
             setMemory(buffer);
+            Mnemonic.updateMnemonics(memory, mnemonics, 0);
         }
     }
 }

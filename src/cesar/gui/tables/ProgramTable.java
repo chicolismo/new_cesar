@@ -34,18 +34,31 @@ public class ProgramTable extends Table<ProgramTableModel> {
         TableColumnModel columnModel = getColumnModel();
         columnModel.setColumnSelectionAllowed(false);
 
+        int col0 = 30;
+        int col1 = 68;
+        int col2 = 40;
+        int col3 = 160;
+
         TableColumn col;
         col = columnModel.getColumn(0);
-        col.setPreferredWidth(30);
+        col.setMinWidth(col0);
+        col.setMaxWidth(col0);
+        col.setPreferredWidth(col0);
         col.setCellRenderer(firstColumnRenderer);
 
         col = columnModel.getColumn(1);
-        col.setPreferredWidth(68);
+        col.setMinWidth(col1);
+        col.setMaxWidth(col1);
+        col.setPreferredWidth(col1);
 
         col = columnModel.getColumn(2);
-        col.setPreferredWidth(40);
+        col.setMinWidth(col2);
+        col.setMaxWidth(col2);
+        col.setPreferredWidth(col2);
 
         col = columnModel.getColumn(3);
-        col.setPreferredWidth(160);
+        col.setMinWidth(col3);
+        col.setMaxWidth(col3);
+        col.setPreferredWidth(col3);
     }
 }

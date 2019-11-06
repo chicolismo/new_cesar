@@ -9,12 +9,14 @@ public class ProgramTableModel extends GenericTableModel {
         String.class };
 
     private int currentPcRow;
-    private byte[] data;
+    private final byte[] data;
+    private final String[] mnemonics;
     private ProgramTable parent;
 
-    public ProgramTableModel(byte[] data) {
+    public ProgramTableModel(final byte[] data, final String[] mnemonics) {
         this.currentPcRow = 0;
         this.data = data;
+        this.mnemonics = mnemonics;
     }
 
     public void setParent(ProgramTable table) {
@@ -69,7 +71,7 @@ public class ProgramTableModel extends GenericTableModel {
                 case 2:
                     return Integer.toString(0xFF & data[rowIndex]);
                 case 3:
-                    return "Não implementado";
+                    return mnemonics[rowIndex];
                 default:
                     return EMPTY;
             }
@@ -81,7 +83,7 @@ public class ProgramTableModel extends GenericTableModel {
                 case 2:
                     return Integer.toHexString(0xFF & data[rowIndex]).toUpperCase();
                 case 3:
-                    return "Não implementado";
+                    return mnemonics[rowIndex];
                 default:
                     return EMPTY;
             }
