@@ -13,17 +13,22 @@ import cesar.gui.windows.MainWindow;
 
 public class Main {
     public static void main(String[] args) {
+
         try {
             for (final LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-//                if ("Metal".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
+                switch (info.getName()) {
+                    case "GTK+":
+                    case "Macintosh":
+                    case "Window":
+                    case "Window XP":
+                    case "Window Vista":
+                        UIManager.setLookAndFeel(info.getClassName());
+                        break;
                 }
             }
         }
         catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-            | UnsupportedLookAndFeelException ex) {
+                | UnsupportedLookAndFeelException ex) {
             Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
         }
 

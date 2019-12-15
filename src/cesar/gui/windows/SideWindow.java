@@ -6,8 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -37,8 +35,10 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
 
     public SideWindow(MainWindow parent, String title, Table<T> table) {
         super(parent, title);
-        setType(Window.Type.UTILITY);
+        // setType(Window.Type.UTILITY);
+        setType(Window.Type.NORMAL);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        setFocusable(false);
 
         this.currentlySelectedRow = 0;
         this.currentBase = Base.Decimal;
@@ -49,7 +49,7 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
 
         initLayout();
         pack();
-        setSize(0, 0);
+        // setResizable(false);
         initEvents();
     }
 
@@ -58,8 +58,11 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
         setContentPane(panel);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-//        scrollPane.setPreferredSize(table.getPreferredSize());
-        scrollPane.setSize(table.getPreferredSize());
+        final Dimension tableSize = table.getPreferredSize();
+        final int scrollBarWidth = 15;
+        final Dimension scrollPaneSize = new Dimension(tableSize.width + scrollBarWidth, tableSize.height);
+        scrollPane.setPreferredSize(scrollPaneSize);
+        scrollPane.getVerticalScrollBar().setSize(new Dimension(scrollBarWidth, 0));
 
         JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
         inputPanel.add(label);
@@ -85,7 +88,6 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
         c_1.gridx = 0;
         c_1.gridy = 2;
         panel.add(inputPanel, c_1);
-        pack();
     }
 
     public String getLabelText() {
@@ -105,16 +107,7 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
     }
 
     private void initEvents() {
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                setSize(new Dimension(getPreferredSize().width, getHeight()));
-                super.componentResized(e);
-            }
-        });
-
-
-        ListSelectionModel selectionModel = table.getSelectionModel();
+        final ListSelectionModel selectionModel = table.getSelectionModel();
         selectionModel.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent event) {
@@ -131,14 +124,14 @@ public class SideWindow<T extends GenericTableModel> extends JDialog {
         });
     }
 
-    private void updateLabelAndInputValues(int row) {
-        short address = (short) row;
-        byte value = table.getValue(row);
+    private void updateLabelAndInputValues(final int row) {
+        final short address = (short) row;
+        final byte value = table.getValue(row);
         label.setText(Integer.toString(Shorts.toUnsignedInt(address), Base.toInt(currentBase)).toUpperCase());
         input.setText(Integer.toString(Bytes.toUnsignedInt(value), Base.toInt(currentBase)).toUpperCase());
     }
 
-    public void setBase(Base base) {
+    public void setBase(final Base base) {
         if (currentBase != base) {
             currentBase = base;
             table.setBase(base);

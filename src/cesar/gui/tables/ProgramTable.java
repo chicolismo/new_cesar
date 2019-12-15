@@ -21,7 +21,7 @@ public class ProgramTable extends Table<ProgramTableModel> {
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-                boolean hasFocus, int row, int column) {
+                    boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setHorizontalAlignment(JLabel.CENTER);
                 setFont(font);
@@ -43,7 +43,7 @@ public class ProgramTable extends Table<ProgramTableModel> {
         int col_0 = 30;
         int col_1 = 68;
         int col_2 = 40;
-        int col_3 = 160;
+        int col_3 = 120;
 
         TableColumn col;
         col = columnModel.getColumn(0);

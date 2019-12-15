@@ -4,7 +4,7 @@ import cesar.hardware.Base;
 
 public class DataTableModel extends GenericTableModel {
     private static final long serialVersionUID = -8479421195862323724L;
-    private Class<?>[] columnClasses = new Class<?>[] { Byte.class, Byte.class };
+    private Class<?>[] columnClasses = new Class<?>[] { Integer.class, Integer.class };
 
     private static final String[] columnNames = new String[] { "Endereço", "Valor" };
     private byte[] data;

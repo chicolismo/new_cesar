@@ -145,14 +145,12 @@ public class MainWindow extends JFrame {
         GridBagConstraints c_1 = new GridBagConstraints();
         c_1.gridx = 1;
         c_1.gridy = 0;
-        c_1.fill = GridBagConstraints.HORIZONTAL;
-        c_1.anchor = GridBagConstraints.NORTHEAST;
+        c_1.fill = GridBagConstraints.BOTH;
         middlePanel.add(conditionPanel, c_1);
         GridBagConstraints c_2 = new GridBagConstraints();
         c_2.gridx = 1;
         c_2.gridy = 1;
-        c_2.fill = GridBagConstraints.HORIZONTAL;
-        c_2.anchor = GridBagConstraints.SOUTHEAST;
+        c_2.fill = GridBagConstraints.BOTH;
         middlePanel.add(buttonPanel, c_2);
 
         BoxLayout vbox = new BoxLayout(panel, BoxLayout.Y_AXIS);
@@ -162,7 +160,7 @@ public class MainWindow extends JFrame {
         panel.add(instructionPanel);
 
         Border border = new CompoundBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED),
-            BorderFactory.createEmptyBorder(4, 4, 4, 4));
+                BorderFactory.createEmptyBorder(4, 4, 4, 4));
         panel.setBorder(border);
 
         getContentPane().add(panel, BorderLayout.CENTER);
@@ -206,6 +204,13 @@ public class MainWindow extends JFrame {
         JMenu editMenu = new JMenu("Editar");
 
         JMenu viewMenu = new JMenu("Visualizar");
+        JMenuItem viewProgramWindow = new JMenuItem("Programa");
+        viewProgramWindow.addActionListener((event) -> programWindow.setVisible(true));
+
+        JMenuItem viewDataWindow = new JMenuItem("Dados");
+        viewDataWindow.addActionListener((event) -> dataWindow.setVisible(true));
+        viewMenu.add(viewProgramWindow);
+        viewMenu.add(viewDataWindow);
 
         JMenu executionMenu = new JMenu("Executar");
         JMenuItem executionRun = new JMenuItem("Rodar");
@@ -266,7 +271,7 @@ public class MainWindow extends JFrame {
             try {
                 final int address = Integer.parseInt(programWindow.getLabelText(), Base.toInt(currentBase));
                 final byte value = (byte) (0xFF
-                    & Integer.parseInt(programWindow.getInputText(), Base.toInt(currentBase)));
+                        & Integer.parseInt(programWindow.getInputText(), Base.toInt(currentBase)));
                 onTextInput(address, value);
                 programWindow.selectNextRow();
             }
@@ -310,16 +315,19 @@ public class MainWindow extends JFrame {
     }
 
     public void updatePositions() {
-        int gap = 10;
-        int width = getWidth();
-        int height = getHeight();
-        Point location = getLocation();
-        Dimension programDim = programWindow.getSize();
-        programWindow.setLocation(location.x - programDim.width - gap, location.y);
+        final int gap = 6;
+        final int width = getWidth();
+        final int height = getHeight();
+        final Point location = getLocation();
+        final Dimension programWindowSize = programWindow.getSize();
+        final Dimension programSize = programWindow.getPreferredSize();
+        final Dimension dataSize = dataWindow.getPreferredSize();
+        programWindow.setLocation(location.x - programWindowSize.width - gap, location.y);
         dataWindow.setLocation(location.x + width + gap, location.y);
-        textWindow.setLocation(location.x - programDim.width - gap, location.y + height + gap);
-        programWindow.setSize(programDim.width, height);
-        dataWindow.setSize(dataWindow.getWidth(), height);
+        programWindow.setSize(programSize.width, height);
+        dataWindow.setSize(dataSize.width, height);
+        textWindow.setLocation(location.x - programWindowSize.width - gap, location.y + height + gap);
+        this.requestFocus();
     }
 
     private void updateDisplays() {
@@ -442,7 +450,7 @@ public class MainWindow extends JFrame {
     private void onTextInput(int address, byte value) {
         // TODO. Criar um método que atualiza a memória do cpu sem computar acessos, e
         // que dispara a atualização dos mnemônicos.
-        memory[0xFFFF & address] = value;
+        cpu.setMemoryAt(address, value);
         programModel.fireTableCellUpdated(address, 2);
         dataModel.fireTableCellUpdated(address, 1);
         if (Cpu.isDisplayAddress((short) address)) {
@@ -453,9 +461,12 @@ public class MainWindow extends JFrame {
     private void onRegisterDisplayDoubleClick(RegisterDisplay display) {
         int registerNumber = display.getNumber();
         short regValue = cpu.getRegisterValue(registerNumber);
-        String message = String.format("Digite novo valor do R%d", registerNumber);
-        String stringValue = Integer.toString(regValue, Base.toInt(currentBase));
-        String stringInput = JOptionPane.showInputDialog(message, stringValue);
+
+        String stringInput = (String) JOptionPane.showInputDialog(display,
+                String.format("Digite novo valor do R%d", registerNumber),
+                String.format("Alterando R%d", registerNumber), JOptionPane.QUESTION_MESSAGE, null, null,
+                Integer.toString(regValue, Base.toInt(currentBase)));
+
         if (stringInput != null && stringInput.length() > 0) {
             try {
                 final short value = (short) (0xFFFF & Integer.parseInt(stringInput, Base.toInt(currentBase)));

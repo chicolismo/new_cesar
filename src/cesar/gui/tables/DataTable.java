@@ -15,8 +15,8 @@ public class DataTable extends Table<DataTableModel> {
         TableColumnModel columnModel = getColumnModel();
         columnModel.setColumnSelectionAllowed(false);
 
-        int col_0 = 80;
-        int col_1 = 50;
+        int col_0 = 65;
+        int col_1 = 65;
 
         TableColumn col;
         col = columnModel.getColumn(0);

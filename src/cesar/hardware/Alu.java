@@ -267,7 +267,7 @@ public class Alu {
     }
 
     void jmp(final AddressMode mode, final int address) {
-        if (mode != AddressMode.Register) {
+        if (mode != AddressMode.REGISTER) {
             registers[PC] = (short) (0xFFFF & address);
         }
     }
@@ -279,7 +279,7 @@ public class Alu {
     }
 
     void jsr(final AddressMode mode, final int address, final int registerNumber) {
-        if (mode != AddressMode.Register) {
+        if (mode != AddressMode.REGISTER) {
             cpu.push(registers[registerNumber]);
             registers[registerNumber] = registers[PC];
             registers[PC] = (short) (0xFFFF & address);

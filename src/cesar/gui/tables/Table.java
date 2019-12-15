@@ -33,7 +33,7 @@ public abstract class Table<Model extends GenericTableModel> extends JTable {
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-                boolean hasFocus, int row, int column) {
+                    boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setHorizontalAlignment(JLabel.CENTER);
                 setFont(font);
@@ -43,7 +43,8 @@ public abstract class Table<Model extends GenericTableModel> extends JTable {
 
         final JTableHeader header = getTableHeader();
         header.setReorderingAllowed(false);
-        header.setResizingAllowed(false);
+//        header.setResizingAllowed(false);
+        header.setResizingAllowed(true);
         headerRenderer.setHorizontalAlignment(JLabel.CENTER);
         headerRenderer.setBackground(new Color(0xdddddd));
         headerRenderer.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));

@@ -39,8 +39,9 @@ public class RegisterPanel extends JPanel {
         super(true);
 
         registerDisplays = new RegisterDisplay[] { new RegisterDisplay(0, "R0:"), new RegisterDisplay(1, "R1:"),
-            new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
-            new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"), new RegisterDisplay(7, "R7: (PC)"), };
+                new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
+                new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"),
+                new RegisterDisplay(7, "R7: (PC)"), };
 
         interruptionPanel = new LedPanel("IS");
 
@@ -51,20 +52,20 @@ public class RegisterPanel extends JPanel {
     private void initLayout() {
         JLabel computerLabel = new JLabel(new ImageIcon(COMPUTER_ICON));
         computerLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 3, 3, 3),
-            BorderFactory.createBevelBorder(BevelBorder.RAISED)));
+                BorderFactory.createBevelBorder(BevelBorder.RAISED)));
 
         JPanel centerPanel = new JPanel();
         GroupLayout groupLayout = new GroupLayout(centerPanel);
         groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-            .addGroup(groupLayout.createSequentialGroup()
-                .addComponent(computerLabel, GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE)
-                // .addPreferredGap(ComponentPlacement.RELATED)
-                .addComponent(interruptionPanel, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE)));
+                .addGroup(groupLayout.createSequentialGroup()
+                        .addComponent(computerLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,
+                                Short.MAX_VALUE)
+                        .addComponent(interruptionPanel, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)));
 
         groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-            .addComponent(interruptionPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-                Short.MAX_VALUE)
-            .addComponent(computerLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
+                .addComponent(interruptionPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                .addComponent(computerLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
         centerPanel.setLayout(groupLayout);
 
         GridLayout grid = new GridLayout(3, 3);

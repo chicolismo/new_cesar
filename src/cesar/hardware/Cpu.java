@@ -122,7 +122,7 @@ public class Cpu {
 
     public void setMemoryAt(final int address, final byte value) {
         memory[0xFFFF & address] = value;
-        firstChangedRow = value;
+        firstChangedRow = address;
         lastChangedRow = Mnemonic.updateMnemonics(memory, mnemonics, address);
     }
 
@@ -165,7 +165,7 @@ public class Cpu {
         int address = 0;
 
         switch (mode) {
-            case Register:
+            case REGISTER:
                 /*
                  * O registrador contém o operando, portanto o endereço é o índice do
                  * registrador
@@ -174,7 +174,7 @@ public class Cpu {
                 address = (short) registerNumber;
                 break;
 
-            case RegisterPostIncremented:
+            case REGISTER_POST_INCREMENTED:
                 /*
                  * O registrador indicado contém o endereço do operando. Após o uso, seu
                  * conteúdo é incrementado de duas unidades, para apontar para o operando
@@ -185,7 +185,7 @@ public class Cpu {
                 registers[registerNumber] += 2;
                 break;
 
-            case RegisterPreDecremented:
+            case REGISTER_PRE_DECREMENTED:
                 /*
                  * O registrador indicado é decrementado de duas unidades, contendo, então, o
                  * endereço do operando.
@@ -195,7 +195,7 @@ public class Cpu {
                 address = Shorts.toUnsignedInt(registers[registerNumber]);
                 break;
 
-            case Indexed: {
+            case INDEXED: {
                 /*
                  * O conteúdo do registrador indicado é somado à palavra que segue o código da
                  * instrução, para, desta maneira, formar o endereço do operando. Note que o R7
@@ -213,7 +213,7 @@ public class Cpu {
                 break;
             }
 
-            case RegisterIndirect: {
+            case REGISTER_INDIRECT: {
                 /*
                  * O registrador indicado contém o endereço do operando.
                  */
@@ -221,7 +221,7 @@ public class Cpu {
                 break;
             }
 
-            case PostIncrementedIndirect: {
+            case POST_INCREMENTED_INDIRECT: {
                 /*
                  * O registrador indicado contém o "endereço do endereço" do operando e, após, é
                  * incrementado de duas unidades.
@@ -238,7 +238,7 @@ public class Cpu {
                 break;
             }
 
-            case PreDrecrementedIndirect: {
+            case PRE_DECREMENTED_INDIRECT: {
                 /*
                  * O regisrador indicado é decrementado de duas unidades e, após, contém o
                  * "endereço do endereço" do operando.
@@ -255,7 +255,7 @@ public class Cpu {
                 break;
             }
 
-            case IndexedIndirect: {
+            case INDEXED_INDIRECT: {
                 /*
                  * O conteúdo do registrador indicado é somado à palavra que segue o código da
                  * instrução, para, desta maneira, formar o endereço do endereço do operando. O
@@ -282,7 +282,7 @@ public class Cpu {
     }
 
     short getValueFromAddress(final AddressMode mode, final int address) {
-        if (mode == AddressMode.Register) {
+        if (mode == AddressMode.REGISTER) {
             return registers[address];
         }
         else {
@@ -291,7 +291,7 @@ public class Cpu {
     }
 
     void setValueToAddress(final AddressMode mode, final int address, final short value) {
-        if (mode == AddressMode.Register) {
+        if (mode == AddressMode.REGISTER) {
             registers[address] = value;
         }
         else {
@@ -299,6 +299,7 @@ public class Cpu {
         }
     }
 
+    // TODO: Criar um enum.
     public static final int END_OF_MEMORY = -1;
     public static final int NOOP = -2;
     public static final int HALTED = -3;
@@ -346,8 +347,7 @@ public class Cpu {
         }
 
         final byte firstByte = fetchNextByte();
-
-        Instruction instruction = Instruction.getInstruction(firstByte);
+        final Instruction instruction = Instruction.getInstruction(firstByte);
 
         if (instruction == Instruction.NOP) {
             return NOOP;
@@ -373,7 +373,7 @@ public class Cpu {
             final short result = alu.oneOperandInstruction(instruction, value);
 
             setValueToAddress(mode, address, result);
-            if (mode != AddressMode.Register) {
+            if (mode != AddressMode.REGISTER) {
                 return address;
             }
             else {
@@ -452,7 +452,6 @@ public class Cpu {
 
         return INVALID_INSTRUCTION;
     }
-
 
     /**
      * Decrementa o SP em 2 e coloca uma palavra no topo da pilha.
