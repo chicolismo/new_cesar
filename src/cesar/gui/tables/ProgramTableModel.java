@@ -27,12 +27,12 @@ public class ProgramTableModel extends GenericTableModel {
         return currentPcRow;
     }
 
-    public void setCurrentPcRow(int row) {
-        if (currentPcRow != row) {
+    public void setPcRow(int newPcRow) {
+        if (currentPcRow != newPcRow) {
             fireTableRowsUpdated(currentPcRow, currentPcRow);
-            fireTableRowsUpdated(row, row);
-            currentPcRow = row;
-            parent.scrollToRow(row);
+            fireTableRowsUpdated(newPcRow, newPcRow);
+            currentPcRow = newPcRow;
+            parent.setPcRow(newPcRow);
         }
     }
 

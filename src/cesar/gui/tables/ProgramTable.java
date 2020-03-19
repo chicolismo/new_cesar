@@ -17,7 +17,7 @@ public class ProgramTable extends Table<ProgramTableModel> {
     static {
         firstColumnRenderer = new DefaultTableCellRenderer() {
             private static final long serialVersionUID = -5000064972152807203L;
-            private final Font font = new Font(Font.MONOSPACED, Font.BOLD, 20);
+            private final Font font = new Font(Font.MONOSPACED, Font.BOLD, 24);
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
@@ -25,7 +25,7 @@ public class ProgramTable extends Table<ProgramTableModel> {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setHorizontalAlignment(JLabel.CENTER);
                 setFont(font);
-                setForeground(Color.GREEN);
+                setForeground(Color.BLUE);
                 return this;
             }
         };
@@ -33,6 +33,10 @@ public class ProgramTable extends Table<ProgramTableModel> {
 
     public ProgramTable(ProgramTableModel model) {
         super(model);
+    }
+
+    public void setPcRow(int newRow) {
+        scrollToRow(newRow);
     }
 
     @Override

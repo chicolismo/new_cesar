@@ -301,6 +301,18 @@ public class MainWindow extends JFrame {
             });
         }
 
+        programTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedRow = programTable.getSelectedRow();
+                if (e.getClickCount() == 2 && selectedRow >= 0) {
+                    cpu.setRegisterValue(7, (short) selectedRow);
+                    programModel.setPcRow(selectedRow);
+                    updateRegisterDiplays();
+                }
+            }
+        });
+
         final JToggleButton btnDec = buttonPanel.getDecButton();
         final JToggleButton btnHex = buttonPanel.getHexButton();
         final JButton btnNext = buttonPanel.getNextButton();
@@ -427,7 +439,7 @@ public class MainWindow extends JFrame {
                         }
                     }
                     repaintAll();
-                    programModel.setCurrentPcRow(Shorts.toUnsignedInt(cpu.getRegisterValue(7)));
+                    programModel.setPcRow(Shorts.toUnsignedInt(cpu.getRegisterValue(7)));
                 }
             };
             runThread.start();
@@ -444,7 +456,7 @@ public class MainWindow extends JFrame {
         updateRegisterDiplays();
         updateConditionDisplays();
         int pcRow = Shorts.toUnsignedInt(cpu.getRegisterValue(7));
-        programModel.setCurrentPcRow(pcRow);
+        programModel.setPcRow(pcRow);
     }
 
     private void onTextInput(int address, byte value) {
