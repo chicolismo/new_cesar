@@ -21,7 +21,7 @@ public class Mnemonic {
     }
 
     public static int updateMnemonics(final byte[] memory, final String[] mnemonics, final int startAt,
-        boolean refreshAll) {
+            boolean refreshAll) {
         int row = startAt;
 
         /*
